@@ -70,6 +70,7 @@ public class App extends JFrame {
 	 * Create the frame.
 	 */
 	public App() {
+		setTitle("Union Of Clubs");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(
 				"src/main/resources/mantis.png"));
 		setResizable(false);
@@ -84,7 +85,7 @@ public class App extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
-		//contentPane.add(createTable(), BorderLayout.CENTER);
+		// contentPane.add(createTable(), BorderLayout.CENTER);
 
 		JLabel lblFullLeagueTable = new JLabel("Full League Table");
 		lblFullLeagueTable.setHorizontalAlignment(SwingConstants.CENTER);
@@ -156,7 +157,7 @@ public class App extends JFrame {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					System.out.println("You chose to open this file: "
 							+ fc.getSelectedFile().getName());
-
+					
 					File selectedFile = fc.getSelectedFile();
 					openXML(selectedFile);
 
@@ -314,13 +315,13 @@ public class App extends JFrame {
 	public void openXML(File selectedFile) {
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		SAXParser parser;
-		League liga = null;
+		OpenLeague liga = null;
 		JScrollPane scrollPane = null;
 
 		try {
 
 			parser = spf.newSAXParser();
-			liga = new League();
+			liga = new OpenLeague();
 
 			parser.parse(
 					new File(App.class

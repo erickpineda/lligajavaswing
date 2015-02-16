@@ -11,7 +11,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class League extends DefaultHandler {
+public class OpenLeague extends DefaultHandler {
 	/**
 	 * Lista de clubs.
 	 */
@@ -60,7 +60,7 @@ public class League extends DefaultHandler {
 	/**
 	 * Constructor de liga.
 	 */
-	public League() {
+	public OpenLeague() {
 		clubs = new ArrayList<Club>();
 		myTable = new JTable();
 		myTable.setModel(myModel);

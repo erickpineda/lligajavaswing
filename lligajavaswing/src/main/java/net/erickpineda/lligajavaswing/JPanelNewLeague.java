@@ -1,12 +1,15 @@
 package net.erickpineda.lligajavaswing;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
+
 import java.awt.Color;
 
 import javax.swing.UIManager;
@@ -24,6 +27,8 @@ public class JPanelNewLeague extends JPanel {
 	private static final long serialVersionUID = 6920115013666487146L;
 	private JTextField textFieldNameLeague;
 	private JTextField textFieldNameClub;
+	private DefaultListModel model = new DefaultListModel();
+	private JList listComponent;
 
 	/**
 	 * Create the panel.
@@ -62,16 +67,17 @@ public class JPanelNewLeague extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, lblClubName, 0,
 				SpringLayout.EAST, lblLeagueName);
 		add(lblClubName);
-		//add(table);
-		
-		
-		final JList<Object> listComponent = new JList<Object>();
+
+		listComponent = new JList(model);
+		//JScrollPane scrollPane = new JScrollPane(listComponent);
 		springLayout.putConstraint(SpringLayout.NORTH, listComponent, 0,
 				SpringLayout.NORTH, lblClubName);
 		springLayout.putConstraint(SpringLayout.WEST, listComponent, 0,
 				SpringLayout.WEST, textFieldNameLeague);
 		springLayout.putConstraint(SpringLayout.EAST, listComponent, 0,
 				SpringLayout.EAST, textFieldNameLeague);
+		
+		
 		add(listComponent);
 
 		textFieldNameClub = new JTextField();
@@ -105,7 +111,7 @@ public class JPanelNewLeague extends JPanel {
 		btnRemove.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
+				removeClub();
 			}
 		});
 		springLayout.putConstraint(SpringLayout.SOUTH, listComponent, 0,
@@ -121,7 +127,7 @@ public class JPanelNewLeague extends JPanel {
 		JButton btnFinish = new JButton("Finish");
 		btnFinish.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+
 			}
 		});
 		springLayout.putConstraint(SpringLayout.NORTH, btnFinish, 24,
@@ -131,15 +137,16 @@ public class JPanelNewLeague extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, btnFinish, 0,
 				SpringLayout.EAST, textFieldNameLeague);
 		add(btnFinish);
-		
-		
 
 	}
-	
-	protected void addClub(){
-		
-		
-		
-		
+
+	protected void addClub() {
+		model.addElement(textFieldNameClub.getText());
+		textFieldNameClub.setText("");
+	}
+
+	protected void removeClub() {
+		if (model.getSize() > 0)
+			model.removeElementAt(0);
 	}
 }
