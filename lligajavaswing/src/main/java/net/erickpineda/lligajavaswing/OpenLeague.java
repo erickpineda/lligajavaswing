@@ -17,6 +17,10 @@ public class OpenLeague extends DefaultHandler {
 	 */
 	private List<Club> clubs = null;
 	/**
+	 * Si la etiqueta point existe.
+	 */
+	private boolean TAG_POINT = false;
+	/**
 	 * Si la etiqueta won existe.
 	 */
 	private boolean TAG_WON = false;
@@ -32,6 +36,10 @@ public class OpenLeague extends DefaultHandler {
 	 * Variable que tendrá el nombre del club.
 	 */
 	private String clubName = "";
+	/**
+	 * Número de puntos por partidos del club.
+	 */
+	private int puntos;
 	/**
 	 * Número de victorias del club.
 	 */
@@ -55,7 +63,7 @@ public class OpenLeague extends DefaultHandler {
 	/**
 	 * Las cabeceras de la tabla.
 	 */
-	private String[] headers = { "Club", "Won", "Drawn", "Lost" };
+	private String[] headers = { "Club", "Points", "Won", "Drawn", "Lost" };
 
 	/**
 	 * Constructor de liga.
@@ -67,6 +75,7 @@ public class OpenLeague extends DefaultHandler {
 	}
 
 	/**
+	 * Método que genera las cabeceras y el contenido de la tabla.
 	 * 
 	 * @return Retorna un scrollPane, con la tabla, el modelo y la información
 	 *         ya almacenada.
@@ -89,14 +98,15 @@ public class OpenLeague extends DefaultHandler {
 	 *         DefaultTableModel.
 	 */
 	protected Object[] generateLine(int i) {
-		Object[] data = new Object[4];
+		Object[] data = new Object[5];
 
 		Club c = clubs.get(i);
 
 		data[0] = c.getClubName();
-		data[1] = c.getWon();
-		data[2] = c.getDrawn();
-		data[3] = c.getLost();
+		data[1] = c.getPoints();
+		data[2] = c.getWon();
+		data[3] = c.getDrawn();
+		data[4] = c.getLost();
 
 		return data;
 	}
@@ -129,6 +139,7 @@ public class OpenLeague extends DefaultHandler {
 	public void endDocument() throws SAXException {
 		for (Club c : clubs)
 			System.out.println(c.toString());
+
 	}
 
 	/**
@@ -139,6 +150,13 @@ public class OpenLeague extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) {
 
+		if (qName.equals("club"))
+			if (!attributes.getValue("name").isEmpty())
+				clubName = attributes.getValue(0);
+
+		if (qName.equalsIgnoreCase("points"))
+			TAG_POINT = true;
+
 		if (qName.equalsIgnoreCase("won"))
 			TAG_WON = true;
 
@@ -147,10 +165,6 @@ public class OpenLeague extends DefaultHandler {
 
 		if (qName.equalsIgnoreCase("lost"))
 			TAG_LOST = true;
-
-		if (qName.equals("club"))
-			if (!attributes.getValue("name").isEmpty())
-				clubName = attributes.getValue(0);
 
 	}
 
@@ -162,6 +176,11 @@ public class OpenLeague extends DefaultHandler {
 	public void characters(char ch[], int start, int length)
 			throws SAXException {
 
+		if (TAG_POINT) {
+			String p = new String(ch, start, length);
+			puntos = Integer.parseInt(p);
+			TAG_POINT = false;
+		}
 		if (TAG_WON) {
 			String v = new String(ch, start, length);
 			victorias = Integer.parseInt(v);
@@ -187,7 +206,7 @@ public class OpenLeague extends DefaultHandler {
 			throws SAXException {
 
 		if (qName.equalsIgnoreCase("club"))
-			clubs.add(new Club(clubName, victorias, empates, derrotas));
+			clubs.add(new Club(clubName, puntos, victorias, empates, derrotas));
 
 	}
 }

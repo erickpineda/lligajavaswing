@@ -1,9 +1,9 @@
 package net.erickpineda.lligajavaswing;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,15 +28,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.ActionMapUIResource;
-import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -45,10 +46,16 @@ import org.xml.sax.SAXException;
 public class App extends JFrame {
 
 	/**
-	 * 
+	 * ID de la clase.
 	 */
 	private static final long serialVersionUID = 1L;
+	/**
+	 * Panel contenedor de los componentes.
+	 */
 	private JPanel contentPane;
+
+	private File myFile;
+	private JScrollPane xcroll;
 
 	/**
 	 * Launch the application.
@@ -73,27 +80,39 @@ public class App extends JFrame {
 		setTitle("Union Of Clubs");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(
 				"src/main/resources/mantis.png"));
+
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(450, 200, 450, 300);
 
 		createMenu();
-		controlQ();
+		keyBoardEvents();
 
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBackground(SystemColor.controlHighlight);
+		contentPane.setBorder(new CompoundBorder(null,
+				new TitledBorder(UIManager.getBorder("TitledBorder.border"),
+						"", TitledBorder.CENTER, TitledBorder.TOP, null,
+						new Color(0, 0, 0))));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-
-		// contentPane.add(createTable(), BorderLayout.CENTER);
 
 		JLabel lblFullLeagueTable = new JLabel("Full League Table");
 		lblFullLeagueTable.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblFullLeagueTable, BorderLayout.NORTH);
 
 		JButton btnEnterANew = new JButton("Enter a new sport session");
+		btnEnterANew.setForeground(new Color(0, 0, 0));
+		btnEnterANew.setBackground(SystemColor.scrollbar);
+		btnEnterANew.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+			}
+		});
 		contentPane.add(btnEnterANew, BorderLayout.SOUTH);
 
+		xcroll = new JScrollPane();
+		contentPane.add(xcroll, BorderLayout.CENTER);
 	}
 
 	public void createMenu() {
@@ -106,16 +125,16 @@ public class App extends JFrame {
 		JMenuItem mntmNewLeague = new JMenuItem("New League");
 		mntmNewLeague.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// setVisible(false);
 
-				final JFrame f = new JFrame("Create League");
+				final JDialog f = new JDialog((JFrame) null, true);
 				f.setIconImage(Toolkit.getDefaultToolkit().getImage(
 						"src/main/resources/mantis.png"));
 
 				f.setResizable(false);
-				f.setBounds(100, 100, 400, 315);
+				f.setBounds(450, 200, 400, 315);
 				f.getContentPane().setLayout(new BorderLayout());
-				final JPanelNewLeague nuevaLiga = new JPanelNewLeague();
+
+				final JPanelNewLeague nuevaLiga = new JPanelNewLeague(f);
 				f.getContentPane().add(nuevaLiga, BorderLayout.CENTER);
 
 				int ans = JOptionPane.showConfirmDialog(f,
@@ -123,16 +142,19 @@ public class App extends JFrame {
 						JOptionPane.YES_NO_OPTION);
 
 				if (ans == JOptionPane.YES_OPTION) {
+
+					contentPane.remove(xcroll);
+					f.setTitle("Create League");
 					f.setVisible(true);
 				}
+				if (nuevaLiga.isTodoOk() == true) {
 
-				// getContentPane().add(nuevaLiga, BorderLayout.CENTER);
-				// nuevaLiga.setVisible(true);
-				// f.getContentPane().add(createTable(), BorderLayout.SOUTH);
-				// f.pack();
+					xcroll = nuevaLiga.showTable();
+					contentPane.add(xcroll, BorderLayout.CENTER);
+					setContentPane(contentPane);
+					App.this.setTitle(nuevaLiga.getLeagueName() + ".xml");
 
-				// JOptionPane.showMessageDialog(null, nuevaLiga);
-
+				}
 			}
 		});
 
@@ -153,14 +175,24 @@ public class App extends JFrame {
 
 				fc.setFileFilter(filter);
 				int returnVal = fc.showOpenDialog(App.this);
+				contentPane.remove(xcroll);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					System.out.println("You chose to open this file: "
 							+ fc.getSelectedFile().getName());
-					
-					File selectedFile = fc.getSelectedFile();
-					openXML(selectedFile);
 
+					myFile = fc.getSelectedFile();
+
+					File selectedFile = fc.getSelectedFile();
+					App.this.repaint();
+					setContentPane(openXML(selectedFile));
+
+					try {
+						App.this.setTitle(selectedFile.getCanonicalPath()
+								.toLowerCase());
+					} catch (IOException excep) {
+						excep.printStackTrace();
+					}
 				}
 
 			}
@@ -186,6 +218,7 @@ public class App extends JFrame {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					filename.setText(fc.getSelectedFile().getName());
 					dir.setText(fc.getCurrentDirectory().toString());
+
 				}
 				if (returnVal == JFileChooser.CANCEL_OPTION) {
 					filename.setText("You pressed cancel");
@@ -213,136 +246,38 @@ public class App extends JFrame {
 		mnFile.add(mntmExit);
 
 		JMenu mnMatches = new JMenu("Matches");
+		mnMatches.setIcon(new ImageIcon("src/main/resources/trident.png"));
 		menuBar.add(mnMatches);
 
 	}
 
-	public Component createTable() {
-		// array bidimencional de objetos con los datos de la tabla
-		Object[][] data = {
-				{ "Trident", new Integer(22), new Integer(5), new Integer(7),
-						new Integer(0) },
-				{ "DDW Makers", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Mega Sports Jrs", new Integer(5), new Integer(5),
-						new Integer(2), new Integer(5) },
-				{ "Sporting Dikora", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Reading", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Power United", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Calarca", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Purakas", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Cacique FC", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Red Devils", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Real Valle", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Defensor Sporting", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Luna", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Mustang", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Inter Sport", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Los Del Sur", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Rampa Juniors", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Revolucion Vinotinto", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) } };
+	public JPanel openXML(File selectedFile) {
 
-		// array de String's con los tÌtulos de las columnas
-		String[] columnNames = { "Club", "Points", "Won", "Drawn", "Lost" };
-
-		// se crea la Tabla
-		final JTable table = new JTable(data, columnNames);
-		table.setModel(new DefaultTableModel(new Object[][] {
-				{ "Trident", new Integer(22), new Integer(5), new Integer(7),
-						new Integer(0) },
-				{ "DDW Makers", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Mega Sports Jrs", new Integer(5), new Integer(5),
-						new Integer(2), new Integer(5) },
-				{ "Sporting Dikora", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Reading", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Power United", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Calarca", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Purakas", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Cacique FC", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Red Devils", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Real Valle", new Integer(5), new Integer(5), new Integer(5),
-						new Integer(5) },
-				{ "Defensor Sporting", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Luna", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Deportivo Mustang", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Inter Sport", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Los Del Sur", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Rampa Juniors", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) },
-				{ "Revolucion Vinotinto", new Integer(5), new Integer(5),
-						new Integer(5), new Integer(5) }, }, new String[] {
-				"Club", "Points", "Won", "Drawn", "Lost" }));
-		table.getColumnModel().getColumn(0).setPreferredWidth(104);
-		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-
-		// Creamos un JscrollPane y le agregamos la JTable
-		JScrollPane scrollPane = new JScrollPane(table);
-
-		// Agregamos el JScrollPane al contenedor
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-
-		return scrollPane;
-	}
-
-	public void openXML(File selectedFile) {
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		SAXParser parser;
 		OpenLeague liga = null;
-		JScrollPane scrollPane = null;
 
 		try {
 
 			parser = spf.newSAXParser();
 			liga = new OpenLeague();
 
-			parser.parse(
-					new File(App.class
-							.getResource("/" + selectedFile.getName())
-							.getFile()), liga);
+			parser.parse(selectedFile, liga);
+			xcroll = liga.showTable();
 
-			scrollPane = liga.showTable();
+			contentPane.add(xcroll, BorderLayout.CENTER);
 
-			contentPane.add(scrollPane, BorderLayout.CENTER);
-			setContentPane(contentPane);
-
-		} catch (ParserConfigurationException e2) {
-			e2.printStackTrace();
-		} catch (SAXException e2) {
-			e2.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return contentPane;
 	}
 
-	protected void controlQ() {
+	protected void keyBoardEvents() {
 		JPanel p = new JPanel();
 		ActionMap actionMap = new ActionMapUIResource();
 
@@ -351,6 +286,9 @@ public class App extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Save action performed.");
+				if (myFile != null) {
+					openXML(myFile);
+				}
 			}
 		});
 

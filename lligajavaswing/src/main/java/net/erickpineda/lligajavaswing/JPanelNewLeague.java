@@ -1,39 +1,93 @@
 package net.erickpineda.lligajavaswing;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
-
 import java.awt.Color;
-
-import javax.swing.UIManager;
-import javax.swing.SpringLayout;
-
+import java.awt.Font;
+import java.awt.ScrollPane;
+import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
 public class JPanelNewLeague extends JPanel {
 	/**
-	 * 
+	 * ID de la clase.
 	 */
 	private static final long serialVersionUID = 6920115013666487146L;
-	private JTextField textFieldNameLeague;
+	/**
+	 * Lista de clubes en la liga.
+	 */
+	private List<Club> clubs;
+	/**
+	 * Cabecera de la tabla.
+	 */
+	private String[] headers = { "Club", "Points", "Won", "Drawn", "Lost" };
+	/**
+	 * Componente que llevará la lista de clubes, cuando se le da al boton add.
+	 */
+	private JList<String> listComponent;
+	/**
+	 * Mensajes de error, que parecen en el panel, cuando la acción es inválida.
+	 */
+	private JLabel mensajeError;
+	/**
+	 * Modelo que seguirá el {@code JList<String> listComponent}.
+	 */
+	private DefaultListModel<String> model = new DefaultListModel<String>();
+	/**
+	 * Creará una tabla para almacenar los clubes y su información.
+	 */
+	private JTable myTable;
+	/**
+	 * ScrollPane que alamacena los clubes.
+	 */
+	private ScrollPane scrollPane;
+	/**
+	 * Almacena los datos de cada club.
+	 */
+	private DefaultTableModel tableModel = new DefaultTableModel();
+	/**
+	 * Recoge el nombre del club a crear.
+	 */
 	private JTextField textFieldNameClub;
-	private DefaultListModel model = new DefaultListModel();
-	private JList listComponent;
+	/**
+	 * Nombre de la liga y fichero xml a crear.
+	 */
+	private JTextField textFieldNameLeague;
+	/**
+	 * Valor boleano que comprueba si todo es correcto.
+	 */
+	private boolean todoOk = false;
 
 	/**
-	 * Create the panel.
+	 * Crea el JPanel de crear liga.
+	 * 
+	 * @param owner
+	 *            JDialog que pasa por parámetro cuando se crea un
+	 *            {@code JPanelNewLeague}.
 	 */
-	public JPanelNewLeague() {
+	public JPanelNewLeague(final JDialog owner) {
+		setForeground(SystemColor.controlHighlight);
 		setBorder(new CompoundBorder(null, new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
 				"Insert information", TitledBorder.CENTER, TitledBorder.TOP,
@@ -42,6 +96,7 @@ public class JPanelNewLeague extends JPanel {
 		SpringLayout springLayout = new SpringLayout();
 		setLayout(springLayout);
 
+		// Label para el nombre de la liga
 		JLabel lblLeagueName = new JLabel("League name");
 		springLayout.putConstraint(SpringLayout.NORTH, lblLeagueName, 26,
 				SpringLayout.NORTH, this);
@@ -51,7 +106,9 @@ public class JPanelNewLeague extends JPanel {
 				SpringLayout.WEST, this);
 		add(lblLeagueName);
 
+		// TextField para recoger el nombre de la liga
 		textFieldNameLeague = new JTextField();
+		textFieldNameLeague.setBackground(SystemColor.textHighlightText);
 		springLayout.putConstraint(SpringLayout.NORTH, textFieldNameLeague, -3,
 				SpringLayout.NORTH, lblLeagueName);
 		springLayout.putConstraint(SpringLayout.WEST, textFieldNameLeague, 42,
@@ -61,6 +118,7 @@ public class JPanelNewLeague extends JPanel {
 		textFieldNameLeague.setColumns(10);
 		add(textFieldNameLeague);
 
+		// Label para el nombre del club
 		final JLabel lblClubName = new JLabel("Club name");
 		springLayout.putConstraint(SpringLayout.WEST, lblClubName, 0,
 				SpringLayout.WEST, lblLeagueName);
@@ -68,19 +126,30 @@ public class JPanelNewLeague extends JPanel {
 				SpringLayout.EAST, lblLeagueName);
 		add(lblClubName);
 
-		listComponent = new JList(model);
-		//JScrollPane scrollPane = new JScrollPane(listComponent);
+		// Lista de clubs
+		listComponent = new JList<String>(model);
+		listComponent.setBackground(SystemColor.textHighlightText);
 		springLayout.putConstraint(SpringLayout.NORTH, listComponent, 0,
 				SpringLayout.NORTH, lblClubName);
 		springLayout.putConstraint(SpringLayout.WEST, listComponent, 0,
 				SpringLayout.WEST, textFieldNameLeague);
 		springLayout.putConstraint(SpringLayout.EAST, listComponent, 0,
 				SpringLayout.EAST, textFieldNameLeague);
-		
-		
-		add(listComponent);
 
+		// Contenedor de lista de clubs
+		scrollPane = new ScrollPane();
+		springLayout.putConstraint(SpringLayout.NORTH, scrollPane, 0,
+				SpringLayout.NORTH, lblClubName);
+		springLayout.putConstraint(SpringLayout.WEST, scrollPane, 0,
+				SpringLayout.WEST, textFieldNameLeague);
+		springLayout.putConstraint(SpringLayout.EAST, scrollPane, 0,
+				SpringLayout.EAST, textFieldNameLeague);
+		scrollPane.add(listComponent);
+		add(scrollPane);
+
+		// TextField para recoger el nombre del club
 		textFieldNameClub = new JTextField();
+		textFieldNameClub.setBackground(SystemColor.textHighlightText);
 		springLayout.putConstraint(SpringLayout.SOUTH, lblClubName, -6,
 				SpringLayout.NORTH, textFieldNameClub);
 		springLayout.putConstraint(SpringLayout.WEST, textFieldNameClub, 0,
@@ -90,7 +159,10 @@ public class JPanelNewLeague extends JPanel {
 		textFieldNameClub.setColumns(10);
 		add(textFieldNameClub);
 
+		// Botón add
 		JButton btnAdd = new JButton("Add");
+		btnAdd.setForeground(new Color(0, 0, 0));
+		btnAdd.setBackground(SystemColor.control);
 		btnAdd.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -107,15 +179,18 @@ public class JPanelNewLeague extends JPanel {
 				SpringLayout.EAST, lblLeagueName);
 		add(btnAdd);
 
+		// Botón remove
 		JButton btnRemove = new JButton("Remove");
+		btnRemove.setForeground(new Color(0, 0, 0));
+		btnRemove.setBackground(SystemColor.control);
+		springLayout.putConstraint(SpringLayout.SOUTH, scrollPane, 0,
+				SpringLayout.SOUTH, btnRemove);
 		btnRemove.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				removeClub();
 			}
 		});
-		springLayout.putConstraint(SpringLayout.SOUTH, listComponent, 0,
-				SpringLayout.SOUTH, btnRemove);
 		springLayout.putConstraint(SpringLayout.NORTH, btnRemove, 6,
 				SpringLayout.SOUTH, btnAdd);
 		springLayout.putConstraint(SpringLayout.WEST, btnRemove, 0,
@@ -124,29 +199,229 @@ public class JPanelNewLeague extends JPanel {
 				SpringLayout.EAST, btnAdd);
 		add(btnRemove);
 
+		// Botón finish
 		JButton btnFinish = new JButton("Finish");
-		btnFinish.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-
-			}
-		});
-		springLayout.putConstraint(SpringLayout.NORTH, btnFinish, 24,
-				SpringLayout.SOUTH, listComponent);
+		btnFinish.setForeground(new Color(0, 0, 0));
+		btnFinish.setBackground(SystemColor.control);
+		springLayout.putConstraint(SpringLayout.NORTH, btnFinish, 33,
+				SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.WEST, btnFinish, 252,
 				SpringLayout.WEST, this);
 		springLayout.putConstraint(SpringLayout.EAST, btnFinish, 0,
 				SpringLayout.EAST, textFieldNameLeague);
+		btnFinish.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				clubList();
+				finish(owner);
+			}
+		});
 		add(btnFinish);
 
+		// Label para los distintos mensajes de error
+		mensajeError = new JLabel("");
+		mensajeError.setForeground(Color.RED);
+		springLayout.putConstraint(SpringLayout.NORTH, mensajeError, 6,
+				SpringLayout.SOUTH, textFieldNameLeague);
+		springLayout.putConstraint(SpringLayout.EAST, mensajeError, -42,
+				SpringLayout.EAST, this);
+		mensajeError.setFont(new Font("Arial", Font.BOLD, 12));
+		add(mensajeError);
+
 	}
 
+	/**
+	 * Método que se ejecuta cuando se oprime el botón {@code JButton btnAdd}.
+	 */
 	protected void addClub() {
-		model.addElement(textFieldNameClub.getText());
-		textFieldNameClub.setText("");
+
+		Pattern patron = Pattern.compile("[a-zA-Z 0-9]{1,20}\\w");
+		Matcher mat = patron.matcher(textFieldNameClub.getText());
+
+		if (mat.matches()) {
+
+			model.addElement(textFieldNameClub.getText().trim());
+			textFieldNameClub.setText("");
+			mensajeError.setText("");
+
+		} else {
+			JOptionPane.showMessageDialog(null,
+					"The name of the club should be at least 2"
+							+ " and 21 characters. [a-zA-Z 0-9]{1,20}\\w",
+					"Name Club Incorrect", JOptionPane.ERROR_MESSAGE);
+		}
+
 	}
 
+	/**
+	 * Método que rellena el {@code ArrayList<Club> clubs} a partir del modelo
+	 * {@code DefaultListModel<String> model} creado.
+	 */
+	protected void clubList() {
+
+		clubs = new ArrayList<Club>();
+		Object[] obj = model.toArray();
+
+		for (int i = 0; i < obj.length; i++) {
+			if (obj[i] instanceof String) {
+				clubs.add(new Club((String) obj[i]));
+			}
+		}
+	}
+
+	/**
+	 * Método que se ejecuta cuando se oprime el botón {@code JButton btnFinish}
+	 * . Comprueba que todos los valores sean válidos.
+	 * 
+	 * @param owner
+	 *            Pasa por prámetro el JDialog que se ejecuta.
+	 */
+	protected void finish(final JDialog owner) {
+
+		CreateLeague liga;
+
+		if (textFieldNameLeague.getText().length() > 0) {
+			liga = new CreateLeague(textFieldNameLeague.getText(), clubs);
+
+			if (liga.checkFileName() == true) {
+
+				if (clubs.size() <= 1) {
+					mensajeError.setText("Deben existir dos equipos mínimo");
+				} else {
+					liga.createInstance();
+					todoOk = true;
+					owner.setVisible(false);
+				}
+			} else {
+				mensajeError.setText("El nombre de la liga es inválido");
+			}
+		} else {
+			mensajeError.setText("El nombre de la liga no puede ser nulo");
+		}
+	}
+
+	/**
+	 * Itera las posiciones del array de cabeceras y crea una columna en la
+	 * tabla para cada una.
+	 */
+	protected void generateHeaders() {
+		for (String header : headers)
+			tableModel.addColumn(header);
+
+	}
+
+	/**
+	 * Método que almacena en un array de objetos las cabeceras de la tabla.
+	 * 
+	 * @param i
+	 *            Parámetro que será la posición del club, que se está iterando.
+	 * @return Retorna un array de objetos que luego se almacenará a un
+	 *         DefaultTableModel.
+	 */
+	protected Object[] generateLine(int i) {
+		Object[] data = new Object[5];
+
+		Club c = clubs.get(i);
+
+		data[0] = c.getClubName();
+		data[1] = c.getPoints();
+		data[2] = c.getWon();
+		data[3] = c.getDrawn();
+		data[4] = c.getLost();
+
+		return data;
+	}
+
+	/**
+	 * Itera la lista de clubs, con la información del XML alamacenado.
+	 */
+	protected void generateTableModel() {
+
+		for (@SuppressWarnings("unused")
+		Club c : clubs)
+			if (myTable.getRowCount() < clubs.size())
+				tableModel.addRow(generateLine(myTable.getRowCount()));
+
+	}
+
+	/**
+	 * 
+	 * @return Retorna una lista de clubes.
+	 */
+	public List<Club> getClubs() {
+		return clubs;
+	}
+
+	/**
+	 * 
+	 * @return Retorna el nombre de la liga, que será también el nombre del
+	 *         fichero.
+	 */
+	public String getLeagueName() {
+		return textFieldNameLeague.getText();
+	}
+
+	/**
+	 * 
+	 * @return Retorna un componente JList.
+	 */
+	public JList<String> getListComponent() {
+		return listComponent;
+	}
+
+	/**
+	 * 
+	 * @return Retorna un ScrollPane, quien contiene un JList.
+	 */
+	public ScrollPane getNewLeaguePanel() {
+		return scrollPane;
+	}
+
+	/**
+	 * Método que devuelve true, si todas las validaciones de cualquier tipo se
+	 * cumplen.
+	 * 
+	 * @return Retorna false, si hay algún error en la validación.
+	 */
+	public boolean isTodoOk() {
+		return todoOk;
+	}
+
+	/**
+	 * Método que detecta el valor o los valores seleccionados en el
+	 * {@code JList<String> listComponent} y los remueve.
+	 */
 	protected void removeClub() {
-		if (model.getSize() > 0)
-			model.removeElementAt(0);
+
+		while (listComponent.getSelectedIndex() >= 0)
+			model.remove(listComponent.getSelectedIndex());
+
+	}
+
+	/**
+	 * Método que permite cambiar el club por otro.
+	 * 
+	 * @param clubs
+	 *            Parámetro a cambiar.
+	 */
+	public void setClubs(List<Club> clubs) {
+		this.clubs = clubs;
+	}
+
+	/**
+	 * Método que creará la tabla y que después se pintará en el JPanel de la
+	 * clase principal.
+	 * 
+	 * @return Retorna un JScrollPane con la información de toda la tabla nueva
+	 *         a crear.
+	 */
+	public JScrollPane showTable() {
+
+		myTable = new JTable(tableModel);
+
+		generateHeaders();
+		generateTableModel();
+
+		JScrollPane scrollPane = new JScrollPane(myTable);
+		return scrollPane;
 	}
 }

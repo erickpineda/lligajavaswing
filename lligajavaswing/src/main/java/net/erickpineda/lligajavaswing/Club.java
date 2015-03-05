@@ -13,6 +13,7 @@ public class Club {
 	 * Partidos perdidos del club.
 	 */
 	private int lost;
+	private int points;
 	/**
 	 * Partidos ganados del club.
 	 */
@@ -30,11 +31,18 @@ public class Club {
 	 * @param perdidos
 	 *            número de partidos perdidos.
 	 */
-	public Club(String nombre, int ganados, int empatados, int perdidos) {
+
+	public Club(String nombre, int puntos, int ganados, int empatados,
+			int perdidos) {
 		this.clubName = nombre;
-		this.setWon(ganados);
-		this.setDrawn(empatados);
-		this.setLost(perdidos);
+		this.points = puntos;
+		this.won = ganados;
+		this.drawn = empatados;
+		this.lost = perdidos;
+	}
+
+	public Club(String nombre) {
+		this.clubName = nombre;
 	}
 
 	/**
@@ -56,6 +64,13 @@ public class Club {
 	 */
 	public int getLost() {
 		return lost;
+	}
+
+	/**
+	 * @return the points
+	 */
+	public int getPoints() {
+		return points;
 	}
 
 	/**
@@ -90,6 +105,14 @@ public class Club {
 	}
 
 	/**
+	 * @param points
+	 *            the points to set
+	 */
+	public void setPoints(int points) {
+		this.points = points;
+	}
+
+	/**
 	 * @param won
 	 *            the won to set.
 	 */
@@ -102,8 +125,9 @@ public class Club {
 	 * perdidos.
 	 */
 	public String toString() {
-		return "The Club: " + this.getClubName() + " has matches won: "
-				+ this.getWon() + " matches drawn: " + this.getDrawn()
-				+ " matches lost " + this.getLost();
+		return "The Club: " + this.getClubName() + " has points: "
+				+ this.getPoints() + " has matches won: " + this.getWon()
+				+ " matches drawn: " + this.getDrawn() + " matches lost "
+				+ this.getLost();
 	}
 }
