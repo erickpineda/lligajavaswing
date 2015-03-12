@@ -41,7 +41,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>net.erickpineda.stax.App</mainClass>
+							<mainClass>net.erickpineda.lligajavaswing.App</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

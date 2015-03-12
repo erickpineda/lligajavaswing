@@ -106,7 +106,14 @@ public class App extends JFrame {
 		btnEnterANew.setBackground(SystemColor.scrollbar);
 		btnEnterANew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-
+				final JDialog f = new JDialog((JFrame) null, true);
+				f.setResizable(false);
+				f.setBounds(450, 200, 450, 300);
+				f.getContentPane().setLayout(new BorderLayout());
+				
+				Match partido = new Match();
+				f.getContentPane().add(partido, BorderLayout.CENTER);
+				f.setVisible(true);
 			}
 		});
 		contentPane.add(btnEnterANew, BorderLayout.SOUTH);
