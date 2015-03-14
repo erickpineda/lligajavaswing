@@ -13,11 +13,26 @@ public class Club {
 	 * Partidos perdidos del club.
 	 */
 	private int lost;
+	/**
+	 * Puntos del club.
+	 */
 	private int points;
 	/**
 	 * Partidos ganados del club.
 	 */
 	private int won;
+	/**
+	 * Si el club ha ganado.
+	 */
+	private boolean hasWon = false;
+	/**
+	 * Si el club ha empatado.
+	 */
+	private boolean hasTied = false;
+	/**
+	 * Si el club a perdido.
+	 */
+	private boolean hasLost = false;
 
 	/**
 	 * Constructor de club.
@@ -41,8 +56,55 @@ public class Club {
 		this.lost = perdidos;
 	}
 
+	/**
+	 * Constructor de clubs a partir de su nombre;
+	 * 
+	 * @param nombre
+	 */
 	public Club(String nombre) {
 		this.clubName = nombre;
+	}
+
+	/**
+	 * Método que agrega puntos un club.
+	 */
+	public void addPoints() {
+		if (hasWon == true) {
+			this.points += 3;
+			hasWon = false;
+		}
+		if (hasTied == true) {
+			this.points += 1;
+			hasTied = false;
+		}
+		if (hasLost == true) {
+			this.points += 0;
+			hasLost = false;
+		}
+	}
+
+	/**
+	 * Método que agrega una victoria al club.
+	 */
+	public void addVictory() {
+		this.hasWon = true;
+		this.won += 1;
+	}
+
+	/**
+	 * Método que agrega una derrota al club.
+	 */
+	public void addDefeat() {
+		this.hasLost = true;
+		this.lost += 1;
+	}
+
+	/**
+	 * Método que agrega un empatea al club.
+	 */
+	public void addDrawn() {
+		this.hasTied = true;
+		this.drawn += 1;
 	}
 
 	/**

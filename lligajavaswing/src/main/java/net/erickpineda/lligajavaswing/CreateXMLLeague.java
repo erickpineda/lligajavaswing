@@ -10,7 +10,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class CreateLeague {
+public class CreateXMLLeague {
 	/**
 	 * Create Factory.
 	 */
@@ -37,7 +37,7 @@ public class CreateLeague {
 	 * @param teams
 	 *            Clubs of the League.
 	 */
-	public CreateLeague(String pathFile, List<Club> teams) {
+	public CreateXMLLeague(String pathFile, List<Club> teams) {
 
 		this.clubs = teams;
 		this.pathToFile = pathFile;

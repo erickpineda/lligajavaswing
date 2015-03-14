@@ -21,13 +21,11 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
 
 public class JPanelNewLeague extends JPanel {
 	/**
@@ -38,10 +36,6 @@ public class JPanelNewLeague extends JPanel {
 	 * Lista de clubes en la liga.
 	 */
 	private List<Club> clubs;
-	/**
-	 * Cabecera de la tabla.
-	 */
-	private String[] headers = { "Club", "Points", "Won", "Drawn", "Lost" };
 	/**
 	 * Componente que llevará la lista de clubes, cuando se le da al boton add.
 	 */
@@ -55,17 +49,9 @@ public class JPanelNewLeague extends JPanel {
 	 */
 	private DefaultListModel<String> model = new DefaultListModel<String>();
 	/**
-	 * Creará una tabla para almacenar los clubes y su información.
-	 */
-	private JTable myTable;
-	/**
 	 * ScrollPane que alamacena los clubes.
 	 */
 	private ScrollPane scrollPane;
-	/**
-	 * Almacena los datos de cada club.
-	 */
-	private DefaultTableModel tableModel = new DefaultTableModel();
 	/**
 	 * Recoge el nombre del club a crear.
 	 */
@@ -253,6 +239,17 @@ public class JPanelNewLeague extends JPanel {
 	}
 
 	/**
+	 * Método que crea una liga, pasando por parámetro los clubes procesados a
+	 * partir del xml.
+	 * 
+	 * @return Retorna un JScrollPane con los clubes de liga.
+	 */
+	public JScrollPane createLeague() {
+		League ligaNueva = new League(clubs);
+		return ligaNueva.showTable();
+	}
+
+	/**
 	 * Método que rellena el {@code ArrayList<Club> clubs} a partir del modelo
 	 * {@code DefaultListModel<String> model} creado.
 	 */
@@ -277,10 +274,10 @@ public class JPanelNewLeague extends JPanel {
 	 */
 	protected void finish(final JDialog owner) {
 
-		CreateLeague liga;
+		CreateXMLLeague liga;
 
 		if (textFieldNameLeague.getText().length() > 0) {
-			liga = new CreateLeague(textFieldNameLeague.getText(), clubs);
+			liga = new CreateXMLLeague(textFieldNameLeague.getText(), clubs);
 
 			if (liga.checkFileName() == true) {
 
@@ -297,50 +294,6 @@ public class JPanelNewLeague extends JPanel {
 		} else {
 			mensajeError.setText("El nombre de la liga no puede ser nulo");
 		}
-	}
-
-	/**
-	 * Itera las posiciones del array de cabeceras y crea una columna en la
-	 * tabla para cada una.
-	 */
-	protected void generateHeaders() {
-		for (String header : headers)
-			tableModel.addColumn(header);
-
-	}
-
-	/**
-	 * Método que almacena en un array de objetos las cabeceras de la tabla.
-	 * 
-	 * @param i
-	 *            Parámetro que será la posición del club, que se está iterando.
-	 * @return Retorna un array de objetos que luego se almacenará a un
-	 *         DefaultTableModel.
-	 */
-	protected Object[] generateLine(int i) {
-		Object[] data = new Object[5];
-
-		Club c = clubs.get(i);
-
-		data[0] = c.getClubName();
-		data[1] = c.getPoints();
-		data[2] = c.getWon();
-		data[3] = c.getDrawn();
-		data[4] = c.getLost();
-
-		return data;
-	}
-
-	/**
-	 * Itera la lista de clubs, con la información del XML alamacenado.
-	 */
-	protected void generateTableModel() {
-
-		for (@SuppressWarnings("unused")
-		Club c : clubs)
-			if (myTable.getRowCount() < clubs.size())
-				tableModel.addRow(generateLine(myTable.getRowCount()));
-
 	}
 
 	/**
@@ -407,21 +360,4 @@ public class JPanelNewLeague extends JPanel {
 		this.clubs = clubs;
 	}
 
-	/**
-	 * Método que creará la tabla y que después se pintará en el JPanel de la
-	 * clase principal.
-	 * 
-	 * @return Retorna un JScrollPane con la información de toda la tabla nueva
-	 *         a crear.
-	 */
-	public JScrollPane showTable() {
-
-		myTable = new JTable(tableModel);
-
-		generateHeaders();
-		generateTableModel();
-
-		JScrollPane scrollPane = new JScrollPane(myTable);
-		return scrollPane;
-	}
 }

@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class OpenLeague extends DefaultHandler {
+public class OpenXMLLeague extends DefaultHandler {
 	/**
 	 * Lista de clubs.
 	 */
@@ -52,94 +50,31 @@ public class OpenLeague extends DefaultHandler {
 	 * Número de derrotas del club.
 	 */
 	private int derrotas;
-	/**
-	 * Creará una tabla para almacenar los clubes y su información.
-	 */
-	private JTable myTable;
-	/**
-	 * Almacena los datos de cada club.
-	 */
-	private DefaultTableModel myModel = new DefaultTableModel();
-	/**
-	 * Las cabeceras de la tabla.
-	 */
-	private String[] headers = { "Club", "Points", "Won", "Drawn", "Lost" };
 
 	/**
 	 * Constructor de liga.
 	 */
-	public OpenLeague() {
+	public OpenXMLLeague() {
 		clubs = new ArrayList<Club>();
-		myTable = new JTable();
-		myTable.setModel(myModel);
 	}
 
 	/**
-	 * Método que genera las cabeceras y el contenido de la tabla.
+	 * Método que crea una liga, pasando por parámetro los clubes procesados a
+	 * partir del xml.
 	 * 
-	 * @return Retorna un scrollPane, con la tabla, el modelo y la información
-	 *         ya almacenada.
+	 * @return Retorna un JScrollPane con los clubes de liga.
 	 */
-	public JScrollPane showTable() {
-
-		generateHeaders();
-		generateTableModel();
-
-		JScrollPane scrollPane = new JScrollPane(myTable);
-		return scrollPane;
+	public JScrollPane createLeague() {
+		League ligaNueva = new League(clubs);
+		return ligaNueva.showTable();
 	}
 
 	/**
-	 * Método que almacena en un array de objetos las cabeceras de la tabla.
 	 * 
-	 * @param i
-	 *            Parámetro que será la posición del club, que se está iterando.
-	 * @return Retorna un array de objetos que luego se almacenará a un
-	 *         DefaultTableModel.
+	 * @return Retorna la lista de clubs.
 	 */
-	protected Object[] generateLine(int i) {
-		Object[] data = new Object[5];
-
-		Club c = clubs.get(i);
-
-		data[0] = c.getClubName();
-		data[1] = c.getPoints();
-		data[2] = c.getWon();
-		data[3] = c.getDrawn();
-		data[4] = c.getLost();
-
-		return data;
-	}
-
-	/**
-	 * Itera las posiciones del array de cabeceras y crea una columna en la
-	 * tabla para cada una.
-	 */
-	protected void generateHeaders() {
-		for (String header : headers)
-			myModel.addColumn(header);
-
-	}
-
-	/**
-	 * Itera la lista de clubs, con la información del XML alamacenado.
-	 */
-	protected void generateTableModel() {
-
-		for (@SuppressWarnings("unused")
-		Club c : clubs)
-			if (myTable.getRowCount() < clubs.size())
-				myModel.addRow(generateLine(myTable.getRowCount()));
-
-	}
-
-	/**
-	 * Fin del documento XML.
-	 */
-	public void endDocument() throws SAXException {
-		for (Club c : clubs)
-			System.out.println(c.toString());
-
+	public List<Club> getClubs() {
+		return clubs;
 	}
 
 	/**
