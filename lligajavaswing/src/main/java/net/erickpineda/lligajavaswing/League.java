@@ -1,5 +1,7 @@
 package net.erickpineda.lligajavaswing;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JScrollPane;
@@ -68,9 +70,23 @@ public class League {
 	}
 
 	/**
+	 * Método que ordena los clubs, por medio de su puntuación.
+	 */
+	public void sortClubs() {
+		Collections.sort(clubs, new Comparator<Club>() {
+
+			public int compare(Club c1, Club c2) {
+				return new Integer(c2.getPoints()).compareTo(new Integer(c1
+						.getPoints()));
+			}
+		});
+	}
+
+	/**
 	 * Itera la lista de clubs, con la información del XML alamacenado.
 	 */
 	protected void generateTableModel() {
+		sortClubs();
 
 		for (@SuppressWarnings("unused")
 		Club c : clubs)

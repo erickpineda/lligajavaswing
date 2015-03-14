@@ -50,8 +50,7 @@ public class CreateXMLLeague {
 
 		try {
 			xof = XMLOutputFactory.newInstance();
-			escritorXML = xof.createXMLStreamWriter(new FileWriter(pathToFile
-					+ ".xml"));
+			escritorXML = xof.createXMLStreamWriter(new FileWriter(pathToFile));
 
 			createXMLFile();
 
@@ -73,6 +72,9 @@ public class CreateXMLLeague {
 		Pattern patron = Pattern
 				.compile("([a-zA-Z]{1,10})\\w([ 0-9a-zA-Z]{0,10})");
 		Matcher mat = patron.matcher(pathToFile);
+
+		if (!pathToFile.endsWith(".xml"))
+			pathToFile += ".xml";
 
 		if (mat.matches())
 			ok = true;

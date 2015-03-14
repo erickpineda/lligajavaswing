@@ -187,7 +187,12 @@ public class App extends JFrame {
 		JMenuItem mntmSaveLeague = new JMenuItem("Save League");
 		mntmSaveLeague.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				saveLeague();
+				if (listaClubes != null) {
+					saveLeague();
+				} else {
+					JOptionPane.showMessageDialog(null,
+							"You need to create a league.");
+				}
 			}
 		});
 		mntmSaveLeague
@@ -245,7 +250,7 @@ public class App extends JFrame {
 			xcroll = nuevaLiga.createLeague();
 			contentPane.add(xcroll, BorderLayout.CENTER);
 			setContentPane(contentPane);
-			App.this.setTitle(nuevaLiga.getLeagueName() + ".xml");
+			App.this.setTitle(nuevaLiga.getLeagueName() + ".xml*");
 			listaClubes = nuevaLiga.getClubs();
 		}
 	}
@@ -360,23 +365,23 @@ public class App extends JFrame {
 	 */
 	public void saveLeague() {
 		JFileChooser fc = new JFileChooser();
-		// JTextField filename = new JTextField(), dir = new JTextField();
+
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				"Only xml files", "xml");
+				"Only xml files *.xml", "xml", "XML");
 
 		fc.setFileFilter(filter);
 		int returnVal = fc.showSaveDialog(App.this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File fileToSave = fc.getSelectedFile();
-			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-			// filename.setText(fc.getSelectedFile().getName());
-			// dir.setText(fc.getCurrentDirectory().toString());
+			CreateXMLLeague liga = new CreateXMLLeague(fc.getSelectedFile()
+					.getAbsolutePath(), listaClubes);
+			liga.createInstance();
 
-		}
-		if (returnVal == JFileChooser.CANCEL_OPTION) {
-			// filename.setText("You pressed cancel");
-			// dir.setText("");
+			JOptionPane.showMessageDialog(null, "File created!",
+					"File created!", JOptionPane.INFORMATION_MESSAGE);
+
+			App.this.setTitle(fc.getSelectedFile().getAbsolutePath());
+
 		}
 	}
 

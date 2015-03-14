@@ -284,7 +284,8 @@ public class JPanelNewLeague extends JPanel {
 				if (clubs.size() <= 1) {
 					mensajeError.setText("Deben existir dos equipos mínimo");
 				} else {
-					liga.createInstance();
+					// liga.createInstance();
+					messageOk();
 					todoOk = true;
 					owner.setVisible(false);
 				}
@@ -337,6 +338,14 @@ public class JPanelNewLeague extends JPanel {
 	 */
 	public boolean isTodoOk() {
 		return todoOk;
+	}
+
+	/**
+	 * Mensaje de todo correcto.
+	 */
+	private void messageOk() {
+		JOptionPane.showMessageDialog(null, "Remember to save the file",
+				"League created!", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
