@@ -55,6 +55,10 @@ public class App extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private List<Club> listaClubes;
 
+	final JFileChooser fc = new JFileChooser();
+	FileNameExtensionFilter filter = new FileNameExtensionFilter(
+			"Only xml files", "xml");
+
 	/**
 	 * Launch the application.
 	 */
@@ -75,10 +79,6 @@ public class App extends JFrame {
 	 * Panel contenedor de los componentes.
 	 */
 	private JPanel contentPane;
-	/**
-	 * Fichero a crear o guardar, según la funcion que se implemente.
-	 */
-	private File myFile;
 	/**
 	 * JScrollPane vacío, que contendrá la tabla de clubes.
 	 */
@@ -118,28 +118,7 @@ public class App extends JFrame {
 
 		btnEnterANew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-
-				final JDialog f = new JDialog((JFrame) null, true);
-				f.setResizable(false);
-				f.setBounds(450, 200, 450, 300);
-				f.getContentPane().setLayout(new BorderLayout());
-
-				if (listaClubes != null) {
-					JPanelMatch partido = new JPanelMatch(listaClubes, f);
-					f.getContentPane().add(partido, BorderLayout.CENTER);
-					f.setVisible(true);
-
-					contentPane.remove(xcroll);
-					xcroll = partido.createLeague();
-					contentPane.add(xcroll, BorderLayout.CENTER);
-					App.this.repaint();
-
-					setContentPane(contentPane);
-					listaClubes = partido.getClubs();
-
-				} else {
-					nullValues();
-				}
+				createNewSportSession();
 			}
 		});
 		contentPane.add(btnEnterANew, BorderLayout.SOUTH);
@@ -187,12 +166,12 @@ public class App extends JFrame {
 		JMenuItem mntmSaveLeague = new JMenuItem("Save League");
 		mntmSaveLeague.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (listaClubes != null) {
+				if (listaClubes != null)
 					saveLeague();
-				} else {
+				else
 					JOptionPane.showMessageDialog(null,
 							"You need to create a league.");
-				}
+
 			}
 		});
 		mntmSaveLeague
@@ -235,23 +214,82 @@ public class App extends JFrame {
 		final JPanelNewLeague nuevaLiga = new JPanelNewLeague(f);
 		f.getContentPane().add(nuevaLiga, BorderLayout.CENTER);
 
-		int ans = JOptionPane.showConfirmDialog(f,
-				"¿Want you create another league?", "Create League",
-				JOptionPane.YES_NO_OPTION);
+		if (listaClubes == null) {
+			confirmation(f, false);
+			confirmationTodoOk(nuevaLiga);
+		} else {
+			confirmation(f, true);
+			confirmationTodoOk(nuevaLiga);
+		}
+	}
 
-		if (ans == JOptionPane.YES_OPTION) {
+	/**
+	 * Método que pasa como parámetro un JDialog y un boleano, para comprobar si
+	 * existe una liga y se desea crear otra.
+	 * 
+	 * @param f
+	 *            Parámetro JDialog a pasar.
+	 * @param confirmed
+	 *            Confirmar si existe ya una liga.
+	 */
+	private void confirmation(final JDialog f, boolean confirmed) {
 
-			contentPane.remove(xcroll);
+		if (confirmed == false) {
 			f.setTitle("Create League");
 			f.setVisible(true);
+
+		} else {
+			int ans = JOptionPane.showConfirmDialog(f,
+					"¿Want you create another league?", "Create League",
+					JOptionPane.YES_NO_OPTION);
+
+			if (ans == JOptionPane.YES_OPTION) {
+				f.setTitle("Create League");
+				f.setVisible(true);
+			}
 		}
+	}
+
+	private void confirmationTodoOk(final JPanelNewLeague nuevaLiga) {
 		if (nuevaLiga.isTodoOk() == true) {
 
+			contentPane.remove(xcroll);
 			xcroll = nuevaLiga.createLeague();
 			contentPane.add(xcroll, BorderLayout.CENTER);
 			setContentPane(contentPane);
-			App.this.setTitle(nuevaLiga.getLeagueName() + ".xml*");
+
+			App.this.setTitle(nuevaLiga.getLeagueName() + ".xml*"
+					+ " - ( Unsaved )");
+
 			listaClubes = nuevaLiga.getClubs();
+		}
+	}
+
+	/**
+	 * Crear partidos, entre los equipos existentes.
+	 */
+	private void createNewSportSession() {
+
+		final JDialog f = new JDialog((JFrame) null, true);
+		f.setResizable(false);
+		f.setBounds(450, 200, 450, 300);
+		f.getContentPane().setLayout(new BorderLayout());
+
+		if (listaClubes != null) {
+			JPanelMatch partido = new JPanelMatch(listaClubes, f);
+			f.getContentPane().add(partido, BorderLayout.CENTER);
+			f.setVisible(true);
+
+			contentPane.remove(xcroll);
+			xcroll = partido.createLeague();
+			contentPane.add(xcroll, BorderLayout.CENTER);
+			App.this.repaint();
+
+			setContentPane(contentPane);
+			listaClubes = partido.getClubs();
+
+		} else {
+			nullValues();
 		}
 	}
 
@@ -267,9 +305,10 @@ public class App extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Save action performed.");
-				if (myFile != null) {
-					processXML(myFile);
-				}
+				if (listaClubes != null)
+					saveLeague();
+				else
+					nullValues();
 			}
 		});
 
@@ -334,40 +373,43 @@ public class App extends JFrame {
 	 * luego.
 	 */
 	public void openXMLLeague() {
-		final JFileChooser fc = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				"Only xml files", "xml");
 
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(App.this);
-		contentPane.remove(xcroll);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			System.out.println("You chose to open this file: "
-					+ fc.getSelectedFile().getName());
-
-			myFile = fc.getSelectedFile();
-
-			File selectedFile = fc.getSelectedFile();
-			App.this.repaint();
-			setContentPane(processXML(selectedFile));
 
 			try {
-				App.this.setTitle(selectedFile.getCanonicalPath().toLowerCase());
+
+				System.out.println("You chose to open this file: "
+						+ fc.getSelectedFile().getName());
+
+				if (fc.getSelectedFile().getName().endsWith(".xml")) {
+					contentPane.remove(xcroll);
+					App.this.repaint();
+					setContentPane(processXML(fc.getSelectedFile()));
+
+					App.this.setTitle(fc.getSelectedFile().getCanonicalPath()
+							.toLowerCase());
+				} else {
+					errorFile();
+				}
+
 			} catch (IOException excep) {
 				excep.printStackTrace();
 			}
+		} else if (returnVal == JFileChooser.CANCEL_OPTION) {
+
+		} else {
+			errorFile();
 		}
+
 	}
 
 	/**
 	 * Guardará la liga que se esté creando o modificando.
 	 */
 	public void saveLeague() {
-		JFileChooser fc = new JFileChooser();
-
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				"Only xml files *.xml", "xml", "XML");
 
 		fc.setFileFilter(filter);
 		int returnVal = fc.showSaveDialog(App.this);
@@ -385,8 +427,12 @@ public class App extends JFrame {
 		}
 	}
 
+	private void errorFile() {
+		JOptionPane.showMessageDialog(null, "The selected file is not XML");
+	}
+
 	private void nullValues() {
-		JOptionPane.showMessageDialog(null, " Error: There is null values");
+		JOptionPane.showMessageDialog(null, "Error: There is null values");
 	}
 
 }
